@@ -13,7 +13,7 @@ export default function Home() {
   const [newContent, setNewContent] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
 
-  // Função para buscar posts
+  // Carregar posts
   const carregarPosts = async () => {
     setLoading(true);
     const res = await fetch('/api/posts');
@@ -36,7 +36,7 @@ export default function Home() {
     setPosts(posts.map(p => p.id === id ? { ...p, likes: p.likes + 1 } : p));
   };
 
-  // Login simples
+  // Login admin
   const fazerLogin = () => {
     if (user === 'Vilor' && pass === '212') {
       setIsAdmin(true);
@@ -47,7 +47,7 @@ export default function Home() {
     }
   };
 
-  // Criar novo post
+  // Criar post
   const criarPost = async () => {
     if (!newTitle || !newContent) return setStatusMsg('Preencha todos os campos!');
     const res = await fetch('/api/posts', {
@@ -65,7 +65,7 @@ export default function Home() {
     }
   };
 
-  // Apagar post (só admin)
+  // Apagar post (admin)
   const apagarPost = async (id) => {
     if (!confirm('Tem certeza que deseja apagar este post?')) return;
     await fetch('/api/posts', {
