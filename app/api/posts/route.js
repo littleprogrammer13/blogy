@@ -1,4 +1,5 @@
-let posts = []; // Banco em memória (volátil, reinicia a cada deploy)
+// Banco em memória
+let posts = []; // reinicia a cada deploy ou restart
 
 export async function GET() {
   return Response.json(posts);
@@ -12,7 +13,7 @@ export async function POST(req) {
       title: body.title,
       content: body.content,
       likes: 0,
-      date: new Date().toISOString(),
+      date: new Date().toISOString()
     };
     posts.push(newPost);
     return Response.json(newPost);
@@ -25,7 +26,7 @@ export async function POST(req) {
 export async function DELETE(req) {
   try {
     const { id } = await req.json();
-    posts = posts.filter((p) => p.id !== id);
+    posts = posts.filter(p => p.id !== id);
     return Response.json({ success: true });
   } catch (e) {
     console.error(e);
