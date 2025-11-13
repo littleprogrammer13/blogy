@@ -1,17 +1,13 @@
-import fs from 'fs';
-import path from 'path';
+import { NextResponse } from 'next/server';
 
-const filePath = path.join(process.cwd(), 'data', 'posts.json');
+// Usaremos o mesmo array de posts em memória (importado via globalThis)
+if (!globalThis.posts) globalThis.posts = [];
+let posts = globalThis.posts;
 
 export async function POST(req) {
   const { id } = await req.json();
-  const posts = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-
   const post = posts.find(p => p.id === id);
-  if (!post) return new Response('Not found', { status: 404 });
-
+  if (!post) return NextResponse.json({ error: 'Post não encontrado' }, { status: 404 });
   post.likes++;
-  fs.writeFileSync(filePath, JSON.stringify(posts, null, 2));
-
-  return Response.json(post);
+  return NextResponse.json(post);
 }
