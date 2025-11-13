@@ -13,7 +13,7 @@ export default function Home() {
   const [newContent, setNewContent] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
 
-  // Carregar posts
+  // Função para buscar posts
   const carregarPosts = async () => {
     setLoading(true);
     const res = await fetch('/api/posts');
@@ -36,7 +36,7 @@ export default function Home() {
     setPosts(posts.map(p => p.id === id ? { ...p, likes: p.likes + 1 } : p));
   };
 
-  // Fazer login
+  // Login simples
   const fazerLogin = () => {
     if (user === 'Vilor' && pass === '212') {
       setIsAdmin(true);
@@ -65,6 +65,17 @@ export default function Home() {
     }
   };
 
+  // Apagar post (só admin)
+  const apagarPost = async (id) => {
+    if (!confirm('Tem certeza que deseja apagar este post?')) return;
+    await fetch('/api/posts', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    carregarPosts();
+  };
+
   const voltarAoTopo = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
@@ -84,19 +95,8 @@ export default function Home() {
       {showLogin && !isAdmin && (
         <div style={loginBox}>
           <h3>🔐 Fazer Login</h3>
-          <input
-            placeholder="Usuário"
-            value={user}
-            onChange={e => setUser(e.target.value)}
-            style={input}
-          /><br />
-          <input
-            placeholder="Senha"
-            type="password"
-            value={pass}
-            onChange={e => setPass(e.target.value)}
-            style={input}
-          /><br />
+          <input placeholder="Usuário" value={user} onChange={e => setUser(e.target.value)} style={input} /><br />
+          <input placeholder="Senha" type="password" value={pass} onChange={e => setPass(e.target.value)} style={input} /><br />
           <button onClick={fazerLogin} style={btnPrimary}>Entrar</button>
           <p style={{ color: 'red' }}>{loginMsg}</p>
         </div>
@@ -105,18 +105,8 @@ export default function Home() {
       {isAdmin && (
         <div style={adminBox}>
           <h3>📝 Criar novo post</h3>
-          <input
-            placeholder="Título"
-            value={newTitle}
-            onChange={e => setNewTitle(e.target.value)}
-            style={input}
-          /><br />
-          <textarea
-            placeholder="Conteúdo"
-            value={newContent}
-            onChange={e => setNewContent(e.target.value)}
-            style={{ ...input, height: '100px' }}
-          /><br />
+          <input placeholder="Título" value={newTitle} onChange={e => setNewTitle(e.target.value)} style={input} /><br />
+          <textarea placeholder="Conteúdo" value={newContent} onChange={e => setNewContent(e.target.value)} style={{ ...input, height: '100px' }} /><br />
           <button onClick={criarPost} style={btnPrimary}>💾 Publicar</button>
           <button onClick={() => { setNewTitle(''); setNewContent(''); }} style={btnSecondary}>🧹 Limpar</button>
           <p>{statusMsg}</p>
@@ -136,109 +126,25 @@ export default function Home() {
           <p>{post.content}</p>
           <small>{new Date(post.date).toLocaleString('pt-BR')}</small>
           <br />
-          <button onClick={() => likePost(post.id)} style={likeBtn}>
-            👍 Curtir ({post.likes})
-          </button>
+          <button onClick={() => likePost(post.id)} style={likeBtn}>👍 Curtir ({post.likes})</button>
+          {isAdmin && (
+            <button onClick={() => apagarPost(post.id)} style={btnDanger}>🗑️ Apagar</button>
+          )}
         </div>
       ))}
-
-      {posts.length === 0 && !loading && (
-        <p>Nenhum post ainda. Faça login para criar o primeiro! 👇</p>
-      )}
     </main>
   );
 }
 
-// ======== ESTILOS ========
-const btnStyle = {
-  background: '#0070f3',
-  color: 'white',
-  border: 'none',
-  padding: '8px 12px',
-  borderRadius: '6px',
-  marginRight: '10px',
-  cursor: 'pointer'
-};
-
-const btnPrimary = {
-  background: '#0070f3',
-  color: '#fff',
-  border: 'none',
-  padding: '8px 14px',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontWeight: 'bold',
-  marginRight: '8px'
-};
-
-const btnSecondary = {
-  background: '#999',
-  color: '#fff',
-  border: 'none',
-  padding: '8px 14px',
-  borderRadius: '6px',
-  cursor: 'pointer'
-};
-
-const btnLogin = {
-  background: '#111',
-  color: 'white',
-  border: 'none',
-  padding: '8px 14px',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontWeight: 'bold'
-};
-
-const btnLogout = {
-  background: '#e63946',
-  color: 'white',
-  border: 'none',
-  padding: '8px 14px',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontWeight: 'bold'
-};
-
-const likeBtn = {
-  background: '#ff4081',
-  color: 'white',
-  border: 'none',
-  padding: '6px 10px',
-  borderRadius: '5px',
-  cursor: 'pointer',
-  marginTop: '6px'
-};
-
-const postCard = {
-  border: '1px solid #ccc',
-  borderRadius: '8px',
-  padding: '10px',
-  marginBottom: '15px',
-  background: '#fafafa'
-};
-
-const input = {
-  width: '100%',
-  padding: 8,
-  marginBottom: 10,
-  borderRadius: 6,
-  border: '1px solid #ccc'
-};
-
-const loginBox = {
-  border: '1px solid #ddd',
-  borderRadius: 8,
-  padding: 20,
-  maxWidth: 400,
-  marginBottom: 20,
-  background: '#f9f9f9'
-};
-
-const adminBox = {
-  border: '1px solid #ddd',
-  borderRadius: 8,
-  padding: 20,
-  marginBottom: 20,
-  background: '#eaf4ff'
-};
+// === Estilos ===
+const btnStyle = { background: '#0070f3', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', marginRight: '10px', cursor: 'pointer' };
+const btnPrimary = { background: '#0070f3', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', marginRight: '8px' };
+const btnSecondary = { background: '#999', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '6px', cursor: 'pointer' };
+const btnLogin = { background: '#111', color: 'white', border: 'none', padding: '8px 14px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' };
+const btnLogout = { background: '#e63946', color: 'white', border: 'none', padding: '8px 14px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' };
+const likeBtn = { background: '#ff4081', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '5px', cursor: 'pointer', marginTop: '6px', marginRight: '6px' };
+const btnDanger = { background: '#e63946', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '5px', cursor: 'pointer' };
+const postCard = { border: '1px solid #ccc', borderRadius: '8px', padding: '10px', marginBottom: '15px', background: '#fafafa' };
+const input = { width: '100%', padding: 8, marginBottom: 10, borderRadius: 6, border: '1px solid #ccc' };
+const loginBox = { border: '1px solid #ddd', borderRadius: 8, padding: 20, maxWidth: 400, marginBottom: 20, background: '#f9f9f9' };
+const adminBox = { border: '1px solid #ddd', borderRadius: 8, padding: 20, marginBottom: 20, background: '#eaf4ff' };
